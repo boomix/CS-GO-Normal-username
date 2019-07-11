@@ -11,7 +11,7 @@
 #pragma newdecls required
 
 //Allowed symbols
-char g_sAllowedSymbols[150] = "aābcčdeēfgģhiījkķlļmnņoprsštuūvzž0123456789 ";
+char g_sAllowedSymbols[150] = "aābcčdeēfgģhiījkķlļmnņoprsštuūvzž0123456789wqx ";
 
 //Usernames to replace with
 char g_sNewUsernames[][] = {
