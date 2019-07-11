@@ -7,17 +7,13 @@
 
 #include <sourcemod>
 #include <sdktools>
-#include <cstrike>
-//#include <sdkhooks>
 
 #pragma newdecls required
 
-char g_sAllowedSymbols[][] = {
-	"a", "ā", "b", "c", "č", "d", "e", "ē", "f", "g", "ģ", "h", "i", "ī", "j", "k", "ķ", "l",
-	"ļ", "m", "n", "ņ", "o", "p", "r", "s", "š", "t", "u", "ū", "v", "z", "ž", "0", "1", "2",
-	"3", "4", "5", "6", "7", "8", "9", "_", "-", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")"
-};
+//Allowed symbols
+char g_sAllowedSymbols[150] = "aābcčdeēfgģhiījkķlļmnņoprsštuūvzž0123456789 ";
 
+//Usernames to replace with
 char g_sNewUsernames[][] = {
 	"vāvare", "zebiekste", "frodze", "mušmire", "līdaka", "varde", "zivs"
 };
@@ -26,27 +22,43 @@ public Plugin myinfo =
 {
 	name = "Normal username",
 	author = PLUGIN_AUTHOR,
-	description = "Check if is username with 3 symbols and not with random shit symbols",
+	description = "Check if is username with 3 symbols and is readable",
 	version = PLUGIN_VERSION,
 	url = "https://identy.lv"
 };
 
 public void OnPluginStart()
 {
-	
+	HookEvent("player_changename", Event_PlayerNameChange);
+}
+
+public Action Event_PlayerNameChange(Handle event, const char[] name, bool dontBroadcast)
+{
+	//Right after name change, check if it is valid
+	CreateTimer(0.1, CheckUsername, GetEventInt(event, "userid"));
+}
+
+public Action CheckUsername(Handle tmr, any userID)
+{
+	int client = GetClientOfUserId(userID);
+	if(client > 0)
+		OnClientAuthorized(client, "");
 }
 
 public void OnClientAuthorized(int client, const char[] auth)
 {
 	
+	//Get client username
 	char username[120];
 	GetClientName(client, username, sizeof(username));
 	
-	//If username is too short, change it
-	if(strlen(username) < 3)
+	//If username is too short, then change it
+	if(strlen(username) < 3) {
 		ChangeUsername(client);
+		return;
+	}
 	
-	//Convert string to lowercase
+	//Convert string to lowercase and continue with checks
 	for (int i = 0; i < strlen(username); i++) {
 		if (IsCharAlpha(username[i])) {
 			username[i] = CharToLower(username[i]);
@@ -56,16 +68,15 @@ public void OnClientAuthorized(int client, const char[] auth)
 	//Check if there are 3 symbols in row from allowed symbols
 	int count = 0;
 	bool bValidUsername = false;
-	for(int i = 0; i < sizeof(g_sAllowedSymbols[]); i++) {
-		if(StrContains(username, g_sAllowedSymbols[i]) != -1) {
-			
-			//If 3 symbols in row, username is valid
+	for (int i = strlen(username); i >= 0; i--) {
+		if(StrContains(g_sAllowedSymbols, username[i]) != -1) {
 			if(count++ == 3) bValidUsername = true;
-			
 		} else {
 			count = 0;
 		}
+		username[i] = 0;
 	}
+
 	
 	if(!bValidUsername)
 		ChangeUsername(client);
