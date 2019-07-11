@@ -53,16 +53,21 @@ public void OnClientAuthorized(int client, const char[] auth)
 		}
 	}
 	
-	//Count how many good symbols username contains
+	//Check if there are 3 symbols in row from allowed symbols
 	int count = 0;
+	bool bValidUsername = false;
 	for(int i = 0; i < sizeof(g_sAllowedSymbols[]); i++) {
 		if(StrContains(username, g_sAllowedSymbols[i]) != -1) {
-			count++;
+			
+			//If 3 symbols in row, username is valid
+			if(count++ == 3) bValidUsername = true;
+			
+		} else {
+			count = 0;
 		}
 	}
 	
-	//If there are not enogh good symbols, change it
-	if(count < 3)
+	if(!bValidUsername)
 		ChangeUsername(client);
 	
 }
