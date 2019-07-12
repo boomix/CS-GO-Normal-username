@@ -70,7 +70,7 @@ public void OnClientAuthorized(int client, const char[] auth)
 	bool bValidUsername = false;
 	for (int i = strlen(username); i >= 0; i--) {
 		if(StrContains(g_sAllowedSymbols, username[i]) != -1) {
-			if(count++ == 3) bValidUsername = true;
+			if(count++ >= 2) bValidUsername = true;
 		} else {
 			count = 0;
 		}
